@@ -1,0 +1,608 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>ShroomLog — Mushroom Cultivation Grow Log</title>
+<meta name="description" content="ShroomLog is a private, offline grow log for home mushroom cultivators. Track colonization, pinning, flushes, yield in grams and contamination across all your grows. No account, your data stays on your device.">
+<meta name="theme-color" content="#1a140e">
+<link rel="canonical" href="https://alexeysamosadov.github.io/shroomlog/">
+<meta property="og:title" content="ShroomLog — Mushroom Cultivation Grow Log">
+<meta property="og:description" content="Private, offline grow log for home mushroom growers. Track colonization, flushes, yield and contamination.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://alexeysamosadov.github.io/shroomlog/">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%8D%84%3C/text%3E%3C/svg%3E">
+<style>
+:root{
+  --bg:#1a140e; --bg2:#241a11; --card:#2b1f14; --card2:#332518;
+  --line:#473625; --line2:#5c4631;
+  --txt:#f0e6d8; --muted:#b39e85; --faint:#8a7659;
+  --accent:#c8772e; --accent2:#e0954a; --gold:#d9a441;
+  --green:#7fa650; --red:#c4583f; --blue:#6d92b5;
+  --radius:14px; --shadow:0 6px 22px rgba(0,0,0,.38);
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{
+  background:radial-gradient(1200px 700px at 12% -8%,#2a1d11 0%,var(--bg) 46%) fixed;
+  color:var(--txt);
+  font:15px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  -webkit-font-smoothing:antialiased; padding-bottom:90px;
+}
+a{color:var(--accent2);text-decoration:none}
+a:hover{text-decoration:underline}
+.wrap{max-width:760px;margin:0 auto;padding:0 16px}
+header.app{
+  position:sticky;top:0;z-index:30;
+  background:linear-gradient(180deg,rgba(26,20,14,.97),rgba(26,20,14,.86));
+  backdrop-filter:blur(8px);border-bottom:1px solid var(--line);
+}
+.bar{display:flex;align-items:center;gap:12px;padding:12px 0}
+.logo{display:flex;align-items:center;gap:9px;font-weight:800;font-size:19px;letter-spacing:.2px}
+.logo .mk{font-size:23px;filter:drop-shadow(0 2px 4px rgba(0,0,0,.4))}
+.logo b{color:var(--accent2)}
+.spacer{flex:1}
+.pill{font-size:11px;font-weight:700;padding:3px 9px;border-radius:999px;border:1px solid var(--line2);color:var(--muted);background:var(--bg2)}
+.pill.pro{color:#1a140e;background:linear-gradient(180deg,var(--gold),var(--accent));border-color:var(--gold)}
+button,.btn{
+  font:inherit;cursor:pointer;border:1px solid var(--line2);background:var(--card2);
+  color:var(--txt);padding:9px 14px;border-radius:10px;font-weight:600;transition:.13s;
+}
+button:hover,.btn:hover{border-color:var(--accent);background:#3b2a18}
+button:active{transform:translateY(1px)}
+.btn.primary{background:linear-gradient(180deg,var(--accent2),var(--accent));border-color:var(--accent);color:#241500;font-weight:700}
+.btn.primary:hover{filter:brightness(1.07)}
+.btn.ghost{background:transparent}
+.btn.sm{padding:6px 10px;font-size:13px;border-radius:8px}
+.btn.danger{color:#f0c8bd;border-color:#6e3326}
+.btn.danger:hover{background:#3a1d16;border-color:var(--red)}
+.btn.gold{background:linear-gradient(180deg,var(--gold),var(--accent));border-color:var(--gold);color:#241500;font-weight:700}
+.row{display:flex;gap:10px;flex-wrap:wrap}
+.row.tight{gap:6px}
+input,select,textarea{
+  font:inherit;width:100%;background:var(--bg2);color:var(--txt);
+  border:1px solid var(--line);border-radius:10px;padding:10px 11px;
+}
+input:focus,select:focus,textarea:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 2px rgba(200,119,46,.18)}
+label{display:block;font-size:12px;font-weight:700;color:var(--muted);margin:0 0 5px;text-transform:uppercase;letter-spacing:.5px}
+textarea{resize:vertical;min-height:56px}
+.field{flex:1;min-width:130px}
+
+.card{background:linear-gradient(180deg,var(--card),var(--bg2));border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow)}
+.grid{display:grid;gap:14px;margin:16px 0}
+
+/* grow card */
+.grow{padding:15px 16px;cursor:pointer;transition:.13s;position:relative;overflow:hidden}
+.grow:hover{border-color:var(--line2);transform:translateY(-1px)}
+.grow .top{display:flex;align-items:flex-start;gap:10px}
+.grow h3{margin:0;font-size:17px;font-weight:700}
+.grow .sub{color:var(--muted);font-size:12.5px;margin-top:2px}
+.tag{display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:700;padding:2px 8px;border-radius:999px;border:1px solid var(--line2);color:var(--muted);background:var(--bg)}
+.stagebadge{font-size:11.5px;font-weight:800;padding:4px 10px;border-radius:999px;white-space:nowrap}
+.statline{display:flex;gap:18px;margin-top:12px;flex-wrap:wrap}
+.stat{display:flex;flex-direction:column;line-height:1.2}
+.stat .n{font-size:19px;font-weight:800;color:var(--txt)}
+.stat .l{font-size:10.5px;text-transform:uppercase;letter-spacing:.6px;color:var(--faint);font-weight:700}
+.stat .n.yield{color:var(--gold)}
+
+/* stage colors */
+.s-inoc{background:#2d3a20;color:#bcd99a;border:1px solid #46612b}
+.s-colo{background:#3a2f17;color:#e0c473;border:1px solid #6b5524}
+.s-full{background:#1f3826;color:#8fd9a8;border:1px solid #2f6b46}
+.s-fruit{background:#2a3346;color:#a8c2e6;border:1px solid #3f5a86}
+.s-pin{background:#3a2540;color:#d9a8e6;border:1px solid #6b3f7a}
+.s-harv{background:#3a2f10;color:var(--gold);border:1px solid #7a5e1c}
+.s-contam{background:#3a1d16;color:#e6a394;border:1px solid #7a392a}
+.s-note{background:#2b2b2b;color:#cfcfcf;border:1px solid #4a4a4a}
+
+/* timeline */
+.tl{position:relative;margin:6px 0 0;padding-left:26px}
+.tl:before{content:"";position:absolute;left:8px;top:6px;bottom:6px;width:2px;background:var(--line2)}
+.tlitem{position:relative;padding:11px 0 11px 4px;border-bottom:1px dashed var(--line)}
+.tlitem:last-child{border-bottom:none}
+.tldot{position:absolute;left:-22px;top:14px;width:12px;height:12px;border-radius:50%;background:var(--accent);border:2px solid var(--bg2);box-shadow:0 0 0 2px var(--line2)}
+.tlitem .when{font-size:11.5px;color:var(--faint);font-weight:700}
+.tlitem .what{margin-top:3px;font-size:14px}
+.tlitem .meta{color:var(--muted);font-size:13px;margin-top:2px}
+.tlitem .del{position:absolute;right:0;top:11px;opacity:0;font-size:11px;color:var(--faint);background:none;border:none;padding:4px}
+.tlitem:hover .del{opacity:1}
+.tlitem .del:hover{color:var(--red)}
+
+.empty{text-align:center;padding:50px 20px;color:var(--muted)}
+.empty .mk{font-size:54px;display:block;margin-bottom:10px;opacity:.85}
+.empty h2{color:var(--txt);margin:0 0 6px}
+
+.section-h{display:flex;align-items:center;gap:10px;margin:20px 0 6px}
+.section-h h2{font-size:15px;margin:0;text-transform:uppercase;letter-spacing:1px;color:var(--muted)}
+.section-h .ln{flex:1;height:1px;background:var(--line)}
+
+/* modal */
+.bg{position:fixed;inset:0;background:rgba(8,5,2,.72);backdrop-filter:blur(3px);display:flex;align-items:flex-start;justify-content:center;z-index:100;padding:26px 14px;overflow:auto}
+.modal{background:linear-gradient(180deg,var(--card),var(--bg2));border:1px solid var(--line2);border-radius:16px;box-shadow:0 18px 50px rgba(0,0,0,.55);width:100%;max-width:540px;padding:22px}
+.modal h2{margin:0 0 4px;font-size:21px}
+.modal .x{position:absolute;top:14px;right:16px}
+.modal-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:14px}
+.muted{color:var(--muted)}
+.faint{color:var(--faint)}
+.hr{height:1px;background:var(--line);margin:16px 0}
+.feat{list-style:none;padding:0;margin:10px 0}
+.feat li{padding:6px 0 6px 26px;position:relative;font-size:14px}
+.feat li:before{content:"🍄";position:absolute;left:0;top:6px;font-size:13px}
+.walletbox{display:flex;gap:8px;align-items:center}
+.walletbox input{font-family:ui-monospace,Menlo,monospace;font-size:12.5px}
+.note{font-size:12.5px;color:var(--faint);margin-top:6px}
+.err{color:var(--red);font-size:13px;margin-top:8px;min-height:1px}
+.ok{color:var(--green);font-size:13px;margin-top:8px;min-height:1px}
+details{margin-top:14px;border-top:1px solid var(--line);padding-top:12px}
+summary{cursor:pointer;font-weight:700;color:var(--muted)}
+.kvtag{display:inline-block;font-size:11px;font-weight:700;color:var(--gold);background:#2e220e;border:1px solid #5e451a;border-radius:6px;padding:2px 7px;margin-left:6px}
+
+/* pro panels */
+.pgrid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media(max-width:560px){.pgrid{grid-template-columns:1fr}}
+.panel{padding:14px 15px}
+.panel h4{margin:0 0 10px;font-size:13px;text-transform:uppercase;letter-spacing:.7px;color:var(--muted)}
+table{width:100%;border-collapse:collapse;font-size:13.5px}
+th,td{text-align:left;padding:6px 6px;border-bottom:1px solid var(--line)}
+th{color:var(--faint);font-size:11px;text-transform:uppercase;letter-spacing:.5px;font-weight:700}
+td.num,th.num{text-align:right;font-variant-numeric:tabular-nums}
+.bar-mini{height:7px;border-radius:4px;background:linear-gradient(90deg,var(--accent),var(--gold));margin-top:4px}
+.lockrow{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--faint)}
+
+.fab{position:fixed;left:50%;transform:translateX(-50%);bottom:18px;z-index:40}
+.fab .btn{box-shadow:0 8px 24px rgba(0,0,0,.45);font-size:15px;padding:13px 22px;border-radius:999px}
+footer{color:var(--faint);font-size:12.5px;text-align:center;padding:26px 16px 8px}
+footer a{color:var(--muted)}
+.toast{position:fixed;left:50%;bottom:84px;transform:translateX(-50%) translateY(20px);background:#0e0a06;border:1px solid var(--line2);color:var(--txt);padding:10px 16px;border-radius:10px;opacity:0;transition:.25s;z-index:200;font-size:13.5px;pointer-events:none}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+.back{display:inline-flex;align-items:center;gap:6px;color:var(--muted);font-weight:600;cursor:pointer;margin:14px 0 2px}
+.back:hover{color:var(--accent2)}
+.hidden{display:none!important}
+.inlineform{padding:16px}
+.inlineform .row{margin-bottom:12px}
+</style>
+</head>
+<body>
+<header class="app">
+  <div class="wrap bar">
+    <div class="logo"><span class="mk">🍄</span><span>Shroom<b>Log</b></span></div>
+    <span class="spacer"></span>
+    <span id="planPill" class="pill">FREE</span>
+    <button id="proBtn" class="btn sm gold">Pro</button>
+  </div>
+</header>
+
+<main class="wrap" id="app"></main>
+
+<div class="fab" id="fab"><button class="btn primary" id="newGrowBtn">＋ New grow</button></div>
+
+<footer>
+  <p>ShroomLog — a private grow log for home mushroom cultivators. Everything is stored locally in your browser. No account, no cloud, no tracking.</p>
+  <p><a href="./mushroom-grow-log-app.html">Grow log app</a> · <a href="./mushroom-cultivation-tracker.html">Cultivation tracker</a> · <a href="https://github.com/AlexeySamosadov/shroomlog">Source</a></p>
+</footer>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* ============ Public key + payment config ============ */
+const PUBLIC_JWK={"kty":"EC","x":"0ROnZaTwgOOKboJZBFCMwscHjvjQ-zmg5E31wS1XEWg","y":"IXRkh9P_l0p2d33_M1IW3D77TuCNQIQmiQ6k1xV4P58","crv":"P-256"};
+const PAY = { wallet:"0xe339997037C7e1C81829fA3e110d3e82B4bDd48E", chain:"Base", token:"USDC", price:"9", contact:"https://github.com/AlexeySamosadov/shroomlog/issues/new" };
+
+/* ============ License (verbatim) ============ */
+let pro=false;
+function fromB(s){s=s.replace(/-/g,"+").replace(/_/g,"/");while(s.length%4)s+="=";const b=atob(s);const a=new Uint8Array(b.length);for(let i=0;i<b.length;i++)a[i]=b.charCodeAt(i);return a;}
+async function verifyLicense(str){try{const[p,sg]=str.trim().split(".");if(!p||!sg)return null;const k=await crypto.subtle.importKey("jwk",PUBLIC_JWK,{name:"ECDSA",namedCurve:"P-256"},false,["verify"]);if(!await crypto.subtle.verify({name:"ECDSA",hash:"SHA-256"},k,fromB(sg),fromB(p)))return null;const pl=JSON.parse(new TextDecoder().decode(fromB(p)));if(pl.exp&&Math.floor(Date.now()/1000)>pl.exp)return{expired:true};return pl;}catch(e){return null;}}
+async function applyLicense(str,silent){const pl=await verifyLicense(str);if(pl&&!pl.expired&&pl.plan==="pro"){pro=true;localStorage.setItem("shroomlog_license",str);if(typeof render==="function")render();if(!silent){const o=document.querySelector("#licOk");if(o)o.textContent="Unlocked — thank you";setTimeout(()=>{const b=document.querySelector("#licBg");if(b)b.remove();},800);}return true;}if(!silent){const e=document.querySelector("#licErr");if(e)e.textContent=pl&&pl.expired?"License expired.":"Invalid key.";}return false;}
+
+/* ============ Data layer ============ */
+const STORE="shroomlog_grows_v1";
+const SPECIES=["Oyster","Shiitake","Lion's Mane","Cube (Psilocybe cubensis)","King Oyster","Reishi","Maitake","Enoki","Pioppino","Wine Cap","Turkey Tail","Other"];
+const METHODS=["Monotub","Grow bag (unicorn)","Jar / spawn","Bucket (bag)","PF tek cake","Martha tent","Log / outdoor","Other"];
+const STAGES=[
+  {k:"inoc",  label:"Inoculated",      cls:"s-inoc",   icon:"💉"},
+  {k:"colo",  label:"Colonizing",      cls:"s-colo",   icon:"🌱", pct:true},
+  {k:"full",  label:"Fully colonized", cls:"s-full",   icon:"⬜"},
+  {k:"fruit", label:"To fruiting",     cls:"s-fruit",  icon:"🌬️"},
+  {k:"pin",   label:"Pinning",         cls:"s-pin",    icon:"📍"},
+  {k:"harv",  label:"Harvest",         cls:"s-harv",   icon:"🍄", harvest:true},
+  {k:"contam",label:"Contamination",   cls:"s-contam", icon:"☣️", contam:true},
+  {k:"note",  label:"General note",    cls:"s-note",   icon:"📝"},
+];
+const stageMeta=k=>STAGES.find(s=>s.k===k)||STAGES[STAGES.length-1];
+
+let grows=load();
+function load(){try{const r=JSON.parse(localStorage.getItem(STORE));return Array.isArray(r)?r:[];}catch(e){return [];}}
+function save(){localStorage.setItem(STORE,JSON.stringify(grows));}
+function uid(){return Date.now().toString(36)+Math.random().toString(36).slice(2,7);}
+const todayISO=()=>new Date().toISOString().slice(0,10);
+
+function fmtDate(iso){if(!iso)return"";const d=new Date(iso+"T00:00:00");return d.toLocaleDateString(undefined,{month:"short",day:"numeric",year:"numeric"});}
+function daysSince(iso){if(!iso)return 0;const a=new Date(iso+"T00:00:00"),b=new Date(todayISO()+"T00:00:00");return Math.max(0,Math.round((b-a)/864e5));}
+function esc(s){return String(s==null?"":s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));}
+
+/* derived per-grow helpers */
+function sortedEntries(g){return [...(g.entries||[])].sort((a,b)=>(b.date+(b.id||"")).localeCompare(a.date+(a.id||"")));}
+function currentStage(g){const e=sortedEntries(g).find(x=>x.stage!=="note"&&x.stage!=="contam");return e?stageMeta(e.stage):null;}
+function totalYield(g){return (g.entries||[]).filter(e=>e.stage==="harv").reduce((s,e)=>s+(+e.grams||0),0);}
+function flushCount(g){return (g.entries||[]).filter(e=>e.stage==="harv").length;}
+function hasContam(g){return (g.entries||[]).some(e=>e.stage==="contam");}
+
+/* ============ Routing ============ */
+let route={view:"list",id:null};
+const $=s=>document.querySelector(s);
+const app=$("#app");
+
+function toast(m){const t=$("#toast");t.textContent=m;t.classList.add("show");clearTimeout(t._t);t._t=setTimeout(()=>t.classList.remove("show"),1900);}
+
+function render(){
+  $("#planPill").textContent=pro?"PRO":"FREE";
+  $("#planPill").className="pill"+(pro?" pro":"");
+  if(route.view==="grow"&&grows.find(g=>g.id===route.id)) renderGrow();
+  else { route.view="list"; renderList(); }
+}
+
+/* ---------- list view ---------- */
+function renderList(){
+  $("#fab").classList.remove("hidden");
+  if(!grows.length){
+    app.innerHTML=`<div class="empty">
+      <span class="mk">🍄</span>
+      <h2>No grows yet</h2>
+      <p>Start your first grow log — track inoculation, colonization, pinning, flushes and yield.</p>
+      <p style="margin-top:18px"><button class="btn primary" onclick="openNewGrow()">＋ Start a grow</button></p>
+    </div>`;
+    return;
+  }
+  const active=grows.filter(g=>!g.archived);
+  let totalG=grows.reduce((s,g)=>s+totalYield(g),0);
+  let cards=active.map(g=>growCard(g)).join("");
+  app.innerHTML=`
+    <div class="section-h"><h2>Your grows</h2><div class="ln"></div>
+      <span class="tag">${active.length} active</span>
+      ${totalG?`<span class="tag">${Math.round(totalG)} g total</span>`:""}
+    </div>
+    <div class="grid">${cards}</div>
+    <div class="section-h"><h2>Pro tools</h2><div class="ln"></div></div>
+    ${proPanels()}
+  `;
+}
+
+function growCard(g){
+  const cs=currentStage(g);
+  const ty=totalYield(g), fc=flushCount(g);
+  const badge=cs?`<span class="stagebadge ${cs.cls}">${cs.icon} ${cs.label}</span>`
+                :`<span class="stagebadge s-note">📝 No stage yet</span>`;
+  const contam=hasContam(g)?`<span class="tag" style="color:#e6a394;border-color:#7a392a">☣️ contam</span>`:"";
+  return `<div class="card grow" onclick="openGrow('${g.id}')">
+    <div class="top">
+      <div style="flex:1">
+        <h3>${esc(g.name)}</h3>
+        <div class="sub">${esc(g.species||"—")} · ${esc(g.method||"—")}</div>
+      </div>
+      ${badge}
+    </div>
+    <div class="row tight" style="margin-top:10px">
+      ${g.substrate?`<span class="tag">🧱 ${esc(g.substrate)}</span>`:""}
+      ${contam}
+    </div>
+    <div class="statline">
+      <div class="stat"><span class="n">${daysSince(g.start)}</span><span class="l">days</span></div>
+      <div class="stat"><span class="n">${(g.entries||[]).length}</span><span class="l">entries</span></div>
+      <div class="stat"><span class="n">${fc}</span><span class="l">flushes</span></div>
+      <div class="stat"><span class="n yield">${ty?Math.round(ty)+" g":"—"}</span><span class="l">yield</span></div>
+    </div>
+  </div>`;
+}
+
+/* ---------- grow detail ---------- */
+function openGrow(id){route={view:"grow",id};window.scrollTo(0,0);render();}
+function openList(){route={view:"list",id:null};window.scrollTo(0,0);render();}
+window.openGrow=openGrow;
+
+function renderGrow(){
+  $("#fab").classList.add("hidden");
+  const g=grows.find(x=>x.id===route.id);
+  const cs=currentStage(g), ty=totalYield(g);
+  const ents=sortedEntries(g);
+  const tl = ents.length ? ents.map(e=>tlItem(g,e)).join("") :
+    `<div class="empty" style="padding:30px"><span class="mk">📝</span><p>No entries yet. Log the first stage below.</p></div>`;
+
+  app.innerHTML=`
+    <div class="back" onclick="openList()">← All grows</div>
+    <div class="card" style="padding:18px;margin-top:8px">
+      <div class="top" style="display:flex;gap:12px;align-items:flex-start">
+        <div style="flex:1">
+          <h2 style="margin:0 0 4px;font-size:22px">${esc(g.name)}</h2>
+          <div class="muted">${esc(g.species||"—")} · ${esc(g.method||"—")}${g.substrate?" · "+esc(g.substrate):""}</div>
+          <div class="faint" style="font-size:12.5px;margin-top:4px">Started ${fmtDate(g.start)} · day ${daysSince(g.start)}</div>
+        </div>
+        ${cs?`<span class="stagebadge ${cs.cls}">${cs.icon} ${cs.label}</span>`:""}
+      </div>
+      <div class="statline" style="margin-top:14px">
+        <div class="stat"><span class="n">${daysSince(g.start)}</span><span class="l">days in</span></div>
+        <div class="stat"><span class="n">${flushCount(g)}</span><span class="l">flushes</span></div>
+        <div class="stat"><span class="n yield">${ty?Math.round(ty)+" g":"—"}</span><span class="l">total yield</span></div>
+      </div>
+      <div class="row tight" style="margin-top:14px">
+        <button class="btn sm" onclick="editGrow('${g.id}')">✎ Edit</button>
+        <button class="btn sm danger" onclick="deleteGrow('${g.id}')">Delete grow</button>
+      </div>
+    </div>
+
+    <div class="card inlineform" id="entryForm" style="margin-top:14px"></div>
+
+    <div class="section-h"><h2>Timeline</h2><div class="ln"></div></div>
+    <div class="card" style="padding:14px 18px">
+      <div class="tl">${tl}</div>
+    </div>
+  `;
+  renderEntryForm(g);
+}
+
+function tlItem(g,e){
+  const m=stageMeta(e.stage);
+  let what=`<span class="stagebadge ${m.cls}" style="font-size:11px">${m.icon} ${m.label}</span>`;
+  let meta="";
+  if(e.stage==="colo"&&e.pct!=null) meta=`<div class="meta">${esc(e.pct)}% colonized</div>`;
+  if(e.stage==="harv"){ meta=`<div class="meta">Flush #${esc(e.flush||"?")} · <b style="color:var(--gold)">${esc(e.grams||0)} g</b></div>`; }
+  if(e.stage==="contam"&&e.note) meta=`<div class="meta">⚠️ ${esc(e.note)}</div>`;
+  if((e.stage==="note")&&e.note) meta=`<div class="meta">${esc(e.note)}</div>`;
+  if(e.stage!=="note"&&e.stage!=="contam"&&e.stage!=="harv"&&e.stage!=="colo"&&e.note) meta=`<div class="meta">${esc(e.note)}</div>`;
+  if((e.stage==="colo"||e.stage==="harv")&&e.note) meta+=`<div class="meta faint">${esc(e.note)}</div>`;
+  return `<div class="tlitem"><span class="tldot" style="background:${dotColor(m.cls)}"></span>
+    <div class="when">${fmtDate(e.date)}${e.date===todayISO()?" · today":""}</div>
+    <div class="what">${what}</div>${meta}
+    <button class="del" title="Delete entry" onclick="delEntry('${g.id}','${e.id}')">✕ delete</button>
+  </div>`;
+}
+function dotColor(cls){return {"s-inoc":"#8fbf4f","s-colo":"#e0c473","s-full":"#5fce8a","s-fruit":"#7ba6df","s-pin":"#cf86e0","s-harv":"#d9a441","s-contam":"#d4674b","s-note":"#9a9a9a"}[cls]||"#c8772e";}
+
+/* ---------- entry form ---------- */
+function renderEntryForm(g){
+  const box=$("#entryForm");
+  const opts=STAGES.map(s=>`<option value="${s.k}">${s.icon} ${s.label}</option>`).join("");
+  box.innerHTML=`
+    <label>Add log entry</label>
+    <div class="row">
+      <div class="field" style="flex:1.3"><select id="eStage">${opts}</select></div>
+      <div class="field"><input type="date" id="eDate" value="${todayISO()}"></div>
+    </div>
+    <div id="eExtra"></div>
+    <div class="row"><div class="field" style="flex:1"><textarea id="eNote" placeholder="Optional note (conditions, observations…)"></textarea></div></div>
+    <div class="row"><button class="btn primary" id="eAdd">＋ Log entry</button></div>
+  `;
+  const stageSel=$("#eStage");
+  const drawExtra=()=>{
+    const k=stageSel.value, ex=$("#eExtra"), note=$("#eNote");
+    if(k==="colo"){ex.innerHTML=`<div class="row"><div class="field"><label>Colonization %</label><input type="number" id="ePct" min="0" max="100" placeholder="e.g. 60"></div></div>`;}
+    else if(k==="harv"){
+      const nextFlush=flushCount(g)+1;
+      ex.innerHTML=`<div class="row"><div class="field"><label>Flush #</label><input type="number" id="eFlush" min="1" value="${nextFlush}"></div><div class="field"><label>Yield (grams, wet)</label><input type="number" id="eGrams" min="0" step="0.1" placeholder="e.g. 240"></div></div>`;
+    }
+    else if(k==="contam"){ex.innerHTML="";note.placeholder="Contamination type — e.g. green mold (Trichoderma), cobweb, bacterial blotch, wet spot…";}
+    else {ex.innerHTML="";note.placeholder="Optional note (conditions, observations…)";}
+  };
+  stageSel.onchange=drawExtra; drawExtra();
+  $("#eAdd").onclick=()=>{
+    const k=stageSel.value, date=$("#eDate").value||todayISO();
+    const note=($("#eNote").value||"").trim();
+    const e={id:uid(),stage:k,date,note};
+    if(k==="colo"){const v=$("#ePct").value;e.pct=v===""?null:Math.max(0,Math.min(100,+v));}
+    if(k==="harv"){e.flush=+($("#eFlush").value||flushCount(g)+1);e.grams=+($("#eGrams").value||0);}
+    if(k==="contam"&&!note){toast("Add a note describing the contamination");return;}
+    g.entries=g.entries||[]; g.entries.push(e); save();
+    toast(stageMeta(k).label+" logged"); renderGrow();
+  };
+}
+function delEntry(gid,eid){const g=grows.find(x=>x.id===gid);if(!g)return;g.entries=(g.entries||[]).filter(e=>e.id!==eid);save();renderGrow();}
+window.delEntry=delEntry;
+
+/* ---------- grow create/edit ---------- */
+function openNewGrow(){growModal(null);}
+function editGrow(id){growModal(grows.find(g=>g.id===id));}
+window.openNewGrow=openNewGrow; window.editGrow=editGrow;
+
+function growModal(g){
+  const isNew=!g;
+  const sp=SPECIES.map(s=>`<option ${g&&g.species===s?"selected":""}>${s}</option>`).join("");
+  const me=METHODS.map(s=>`<option ${g&&g.method===s?"selected":""}>${s}</option>`).join("");
+  const bg=document.createElement("div");bg.className="bg";
+  bg.innerHTML=`<div class="modal" style="position:relative">
+    <button class="btn sm ghost x" data-x>✕</button>
+    <h2>${isNew?"New grow":"Edit grow"}</h2>
+    <p class="muted" style="margin:0 0 14px">${isNew?"Set up a grow. You can log stages once it's created.":""}</p>
+    <div class="row"><div class="field" style="flex:1"><label>Grow name</label><input id="gName" placeholder="e.g. Blue Oyster Tub #3" value="${g?esc(g.name):""}"></div></div>
+    <div class="row">
+      <div class="field"><label>Species</label><select id="gSpecies">${sp}</select></div>
+      <div class="field"><label>Method</label><select id="gMethod">${me}</select></div>
+    </div>
+    <div class="row">
+      <div class="field"><label>Substrate</label><input id="gSub" placeholder="e.g. CVG, masters mix, straw" value="${g?esc(g.substrate||""):""}"></div>
+      <div class="field"><label>Start date</label><input type="date" id="gStart" value="${g?g.start:todayISO()}"></div>
+    </div>
+    <div class="err" id="gErr"></div>
+    <div class="row" style="margin-top:16px;justify-content:flex-end">
+      <button class="btn ghost" data-x>Cancel</button>
+      <button class="btn primary" id="gSave">${isNew?"Create grow":"Save"}</button>
+    </div>
+  </div>`;
+  document.body.appendChild(bg);
+  bg.addEventListener("click",e=>{if(e.target===bg||e.target.hasAttribute("data-x"))bg.remove();});
+  bg.querySelector("#gSave").onclick=()=>{
+    const name=(bg.querySelector("#gName").value||"").trim();
+    if(!name){bg.querySelector("#gErr").textContent="Give your grow a name.";return;}
+    const data={
+      name,
+      species:bg.querySelector("#gSpecies").value,
+      method:bg.querySelector("#gMethod").value,
+      substrate:(bg.querySelector("#gSub").value||"").trim(),
+      start:bg.querySelector("#gStart").value||todayISO(),
+    };
+    if(isNew){grows.unshift({id:uid(),...data,entries:[],created:Date.now()});route={view:"list",id:null};}
+    else{Object.assign(g,data);}
+    save();bg.remove();render();toast(isNew?"Grow created":"Saved");
+  };
+}
+function deleteGrow(id){
+  const g=grows.find(x=>x.id===id);if(!g)return;
+  if(!confirm(`Delete "${g.name}" and all its log entries? This cannot be undone.`))return;
+  grows=grows.filter(x=>x.id!==id);save();openList();toast("Grow deleted");
+}
+window.deleteGrow=deleteGrow;
+
+/* ============ PRO tools ============ */
+function proGate(){ if(!pro){ openLicense(); return false; } return true; }
+
+function proPanels(){
+  const lock=!pro;
+  return `<div class="pgrid">
+    ${csvPanel(lock)}
+    ${speciesPanel(lock)}
+    ${contamPanel(lock)}
+    ${comparePanel(lock)}
+  </div>`;
+}
+function lockHtml(title,desc){
+  return `<div class="card panel">
+    <h4>🔒 ${title}</h4>
+    <p class="muted" style="font-size:13px;margin:0 0 12px">${desc}</p>
+    <button class="btn gold sm" onclick="openLicense()">Unlock with Pro — 9 USDC</button>
+  </div>`;
+}
+
+/* CSV export */
+function csvPanel(lock){
+  if(lock) return lockHtml("CSV export","Export every grow and log entry to a spreadsheet for your own analysis or backup.");
+  return `<div class="card panel">
+    <h4>📤 CSV export</h4>
+    <p class="muted" style="font-size:13px;margin:0 0 12px">Download all grows + entries as CSV.</p>
+    <button class="btn sm" onclick="exportCSV()">Download CSV</button>
+  </div>`;
+}
+function exportCSV(){
+  if(!proGate())return;
+  const rows=[["grow","species","method","substrate","start_date","entry_date","stage","colonization_pct","flush","yield_grams","note"]];
+  grows.forEach(g=>{
+    if(!(g.entries||[]).length){rows.push([g.name,g.species,g.method,g.substrate,g.start,"","","","","",""]);}
+    sortedEntries(g).slice().reverse().forEach(e=>{
+      rows.push([g.name,g.species,g.method,g.substrate,g.start,e.date,stageMeta(e.stage).label,
+        e.stage==="colo"&&e.pct!=null?e.pct:"",e.stage==="harv"?(e.flush||""):"",e.stage==="harv"?(e.grams||0):"",e.note||""]);
+    });
+  });
+  const csv=rows.map(r=>r.map(c=>{c=String(c==null?"":c);return /[",\n]/.test(c)?'"'+c.replace(/"/g,'""')+'"':c;}).join(",")).join("\n");
+  const blob=new Blob([csv],{type:"text/csv"});const a=document.createElement("a");
+  a.href=URL.createObjectURL(blob);a.download="shroomlog-export-"+todayISO()+".csv";a.click();
+  toast("CSV exported");
+}
+window.exportCSV=exportCSV;
+
+/* yield stats per species */
+function speciesPanel(lock){
+  if(lock) return lockHtml("Yield by species","See total grams, flush count and average yield per flush broken down by species.");
+  const map={};
+  grows.forEach(g=>{const sp=g.species||"Other";const m=map[sp]||(map[sp]={grams:0,flushes:0,grows:new Set()});
+    m.grams+=totalYield(g);m.flushes+=flushCount(g);if(totalYield(g)||flushCount(g))m.grows.add(g.id);});
+  const arr=Object.entries(map).filter(([,m])=>m.grams>0||m.flushes>0).sort((a,b)=>b[1].grams-a[1].grams);
+  if(!arr.length) return `<div class="card panel"><h4>📊 Yield by species</h4><p class="muted" style="font-size:13px;margin:0">Log some harvests to see per-species yield stats.</p></div>`;
+  const max=Math.max(...arr.map(([,m])=>m.grams),1);
+  const rows=arr.map(([sp,m])=>`<tr><td>${esc(sp)}</td><td class="num">${Math.round(m.grams)} g</td><td class="num">${m.flushes}</td><td class="num">${m.flushes?Math.round(m.grams/m.flushes):0} g</td></tr>
+    <tr><td colspan="4" style="padding-top:0;border:none"><div class="bar-mini" style="width:${Math.max(6,Math.round(m.grams/max*100))}%"></div></td></tr>`).join("");
+  return `<div class="card panel"><h4>📊 Yield by species</h4>
+    <table><thead><tr><th>Species</th><th class="num">Total</th><th class="num">Flushes</th><th class="num">Avg/flush</th></tr></thead><tbody>${rows}</tbody></table></div>`;
+}
+
+/* contamination log/analysis */
+function contamPanel(lock){
+  if(lock) return lockHtml("Contamination log","Track every contamination event, spot which species/substrates fail most, and learn from it.");
+  const events=[];
+  grows.forEach(g=>(g.entries||[]).filter(e=>e.stage==="contam").forEach(e=>events.push({g,e})));
+  const total=grows.length, contamGrows=grows.filter(hasContam).length;
+  if(!events.length) return `<div class="card panel"><h4>☣️ Contamination log</h4><p class="muted" style="font-size:13px;margin:0">No contamination logged. ${total?`Clean rate: 100% of ${total} grows.`:""}</p></div>`;
+  const byType={};events.forEach(({e})=>{const t=(e.note||"unknown").toLowerCase().split(/[,.;(]/)[0].trim().slice(0,28)||"unknown";byType[t]=(byType[t]||0)+1;});
+  const typeRows=Object.entries(byType).sort((a,b)=>b[1]-a[1]).slice(0,6).map(([t,n])=>`<tr><td>${esc(t)}</td><td class="num">${n}</td></tr>`).join("");
+  const rate=total?Math.round((1-contamGrows/total)*100):0;
+  return `<div class="card panel"><h4>☣️ Contamination log</h4>
+    <p class="muted" style="font-size:13px;margin:0 0 8px">${events.length} event(s) across ${contamGrows}/${total} grows · <b style="color:var(--green)">${rate}% clean rate</b></p>
+    <table><thead><tr><th>Type</th><th class="num">Count</th></tr></thead><tbody>${typeRows}</tbody></table></div>`;
+}
+
+/* grow comparison */
+function comparePanel(lock){
+  if(lock) return lockHtml("Grow comparison","Rank all grows side by side by yield, flushes and days — find your best performers.");
+  const arr=grows.filter(g=>!g.archived).map(g=>({g,y:totalYield(g),f:flushCount(g),d:daysSince(g.start)})).sort((a,b)=>b.y-a.y);
+  if(!arr.length) return `<div class="card panel"><h4>⚖️ Grow comparison</h4><p class="muted" style="font-size:13px;margin:0">No grows to compare yet.</p></div>`;
+  const rows=arr.map((x,i)=>`<tr><td>${i===0&&x.y>0?"🏆 ":""}${esc(x.g.name)}</td><td class="num">${x.y?Math.round(x.y)+" g":"—"}</td><td class="num">${x.f}</td><td class="num">${x.d}d</td></tr>`).join("");
+  return `<div class="card panel"><h4>⚖️ Grow comparison</h4>
+    <table><thead><tr><th>Grow</th><th class="num">Yield</th><th class="num">Flushes</th><th class="num">Age</th></tr></thead><tbody>${rows}</tbody></table></div>`;
+}
+
+/* ============ License modal ============ */
+function openLicense(){
+  const old=document.querySelector("#licBg");if(old)old.remove();
+  const bg=document.createElement("div");bg.className="bg";bg.id="licBg";
+  bg.innerHTML=`<div class="modal" style="position:relative">
+    <button class="btn sm ghost x" data-x>✕</button>
+    <h2>ShroomLog Pro — 9 USDC <span class="kvtag">one-time</span></h2>
+    <p class="muted" style="margin:2px 0 4px">Lifetime unlock. Pay once, works offline forever. No subscription, no account.</p>
+    <ul class="feat">
+      <li>CSV export of every grow &amp; log entry</li>
+      <li>Yield statistics per species (total, flushes, avg/flush)</li>
+      <li>Contamination log &amp; clean-rate analysis</li>
+      <li>Grow comparison — rank your best performers</li>
+    </ul>
+    <div class="hr"></div>
+    <p style="font-weight:700;margin:0 0 8px">Pay ${esc(PAY.price)} ${esc(PAY.token)} on ${esc(PAY.chain)} to:</p>
+    <div class="walletbox">
+      <input id="walletInp" readonly value="${esc(PAY.wallet)}">
+      <button class="btn sm" id="copyWallet">Copy</button>
+    </div>
+    <p class="note">After paying, paste your transaction hash + email below and click <b>Get my key</b>. An automated bot verifies the on-chain payment and replies with your license key (usually within a few minutes).</p>
+    <div class="row" style="margin-top:10px">
+      <div class="field"><label>Transaction hash</label><input id="txh" placeholder="0x…"></div>
+    </div>
+    <div class="row">
+      <div class="field"><label>Email (for your records)</label><input id="email" placeholder="you@example.com"></div>
+    </div>
+    <div class="row" style="margin-top:4px">
+      <button class="btn gold" id="getKey">Get my key →</button>
+    </div>
+    <div class="err" id="licErr"></div>
+    <div class="ok" id="licOk"></div>
+    <details>
+      <summary>Have a key? Activate it</summary>
+      <div class="row" style="margin-top:10px">
+        <div class="field"><input id="licKey" placeholder="Paste license key (payload.signature)"></div>
+      </div>
+      <div class="row"><button class="btn primary" id="activate">Activate</button></div>
+    </details>
+  </div>`;
+  document.body.appendChild(bg);
+  bg.addEventListener("click",e=>{if(e.target===bg||e.target.hasAttribute("data-x"))bg.remove();});
+  bg.querySelector("#copyWallet").onclick=()=>{navigator.clipboard.writeText(PAY.wallet).then(()=>toast("Wallet copied")).catch(()=>{const i=bg.querySelector("#walletInp");i.select();document.execCommand("copy");toast("Wallet copied");});};
+  bg.querySelector("#getKey").onclick=()=>{
+    const tx=(bg.querySelector("#txh").value||"").trim();
+    const em=(bg.querySelector("#email").value||"").trim();
+    if(!tx){bg.querySelector("#licErr").textContent="Enter your payment transaction hash first.";return;}
+    bg.querySelector("#licErr").textContent="";
+    window.open(PAY.contact+"?title=ShroomLog%20Pro%20license%20request&body="+encodeURIComponent("Payment tx hash: "+tx+"\nEmail: "+em),"_blank");
+    bg.querySelector("#licOk").textContent="Opened a request — the bot will reply with your key.";
+  };
+  bg.querySelector("#activate").onclick=()=>{
+    const k=(bg.querySelector("#licKey").value||"").trim();
+    if(!k){bg.querySelector("#licErr").textContent="Paste your license key.";return;}
+    applyLicense(k,false);
+  };
+}
+window.openLicense=openLicense;
+
+/* ============ Boot ============ */
+$("#proBtn").onclick=()=>openLicense();
+$("#newGrowBtn").onclick=()=>openNewGrow();
+(async()=>{
+  const saved=localStorage.getItem("shroomlog_license");
+  if(saved){await applyLicense(saved,true);}
+  render();
+})();
+</script>
+</body>
+</html>
