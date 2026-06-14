@@ -153,6 +153,11 @@ td.num,th.num{text-align:right;font-variant-numeric:tabular-nums}
 .fab .btn{box-shadow:0 8px 24px rgba(0,0,0,.45);font-size:15px;padding:13px 22px;border-radius:999px}
 footer{color:var(--faint);font-size:12.5px;text-align:center;padding:26px 16px 8px}
 footer a{color:var(--muted)}
+.guides{max-width:740px;margin:8px auto 0;padding:18px 16px 4px;text-align:center}
+.guides h3{font-size:11px;text-transform:uppercase;letter-spacing:.7px;color:var(--muted);margin:0 0 10px}
+.guides .glist{display:flex;flex-wrap:wrap;justify-content:center;gap:8px}
+.guides .glist a{display:inline-block;font-size:13px;color:var(--muted);border:1px solid var(--line);background:#241a11;border-radius:999px;padding:6px 13px;text-decoration:none}
+.guides .glist a:hover{color:var(--accent2);border-color:#5c4631}
 .toast{position:fixed;left:50%;bottom:84px;transform:translateX(-50%) translateY(20px);background:#0e0a06;border:1px solid var(--line2);color:var(--txt);padding:10px 16px;border-radius:10px;opacity:0;transition:.25s;z-index:200;font-size:13.5px;pointer-events:none}
 .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
 .back{display:inline-flex;align-items:center;gap:6px;color:var(--muted);font-weight:600;cursor:pointer;margin:14px 0 2px}
@@ -175,6 +180,17 @@ footer a{color:var(--muted)}
 <main class="wrap" id="app"></main>
 
 <div class="fab" id="fab"><button class="btn primary" id="newGrowBtn">＋ New grow</button></div>
+
+<section class="guides">
+  <h3>Growing guides</h3>
+  <div class="glist">
+    <a href="./oyster-mushroom-growing-guide.html">Oyster mushroom growing guide</a>
+    <a href="./best-substrate-for-growing-mushrooms.html">Best substrate by species</a>
+    <a href="./mushroom-colonization-time.html">Mushroom colonization time</a>
+    <a href="./how-to-tell-if-mushroom-grow-is-contaminated.html">Is my grow contaminated?</a>
+    <a href="./why-is-my-mycelium-not-growing.html">Why isn't my mycelium growing?</a>
+  </div>
+</section>
 
 <footer>
   <p>ShroomLog — a private grow log for home mushroom cultivators. Everything is stored locally in your browser. No account, no cloud, no tracking.</p>
